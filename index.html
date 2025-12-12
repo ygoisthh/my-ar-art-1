@@ -8,28 +8,41 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
- <style>
-  html, body { margin:0; height:100%; overflow:hidden; background:#000; }
-  a-scene { position: fixed; inset: 0; width: 100%; height: 100%; }
-</style>
+  <style>
+    html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+    #overlay{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.55); z-index:9999;
+      color:#fff; font:14px/1.4 system-ui; text-align:center; padding:16px;
+    }
+    #btn{padding:12px 18px;border-radius:999px;border:0;font-size:16px;}
+    #status{margin-top:10px;opacity:.9}
+    a-scene{position:fixed;inset:0;width:100%;height:100%;}
+  </style>
+</head>
 
-<a-scene
-  id="scene"
-  mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;"
-  renderer="alpha: true"
-  background="transparent: true"
-  vr-mode-ui="enabled:false"
-  device-orientation-permission-ui="enabled:false"
-  embedded>
+<body>
+  <div id="overlay">
+    <div>
+      <button id="btn">ARを開始</button>
+      <div id="status">押したらカメラ許可 → 作品（ターゲット画像）を映してください</div>
+    </div>
+  </div>
 
-  <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+  <a-scene
+    id="scene"
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;"
+    vr-mode-ui="enabled:false"
+    device-orientation-permission-ui="enabled:false"
+    embedded>
 
-  <a-entity mindar-image-target="targetIndex: 0">
-    <a-image src="./art.png" width="1.5" height="1.5" position="0 0 0.01"></a-image>
-  </a-entity>
+    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
 
-</a-scene>
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-image src="./art.png" width="1.5" height="1.5" position="0 0 0.01"></a-image>
+    </a-entity>
 
+  </a-scene>
 
   <script>
     const overlay = document.getElementById('overlay');
@@ -59,7 +72,6 @@
         btn.disabled = true;
         status.textContent = "起動中…";
 
-        // ファイル存在チェック（ここで404が出ると原因が分かる）
         const [tRes, aRes] = await Promise.all([
           fetch("./targets.mind", { cache: "no-store" }),
           fetch("./art.png", { cache: "no-store" })
@@ -67,13 +79,12 @@
         if (!tRes.ok) throw new Error("targets.mind が見つかりません（" + tRes.status + "）");
         if (!aRes.ok) throw new Error("art.png が見つかりません（" + aRes.status + "）");
 
-        // loaded は既に終わってることがあるので、hasLoaded を見て必要なときだけ待つ
         if (!sceneEl.hasLoaded) {
           await new Promise(res => sceneEl.addEventListener("loaded", res, { once: true }));
         }
 
         const arSystem = await waitForSystem();
-        await arSystem.start();  // ここでカメラが起動するはず
+        await arSystem.start();
 
         overlay.style.display = "none";
       } catch (e) {
@@ -85,11 +96,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
