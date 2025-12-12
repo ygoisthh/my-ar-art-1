@@ -5,33 +5,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>My AR Art</title>
 
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://unpkg.com/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+
   <style>
     html,body{margin:0;height:100%;background:#000;overflow:hidden;}
     #overlay{
       position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-      color:#fff;font:14px/1.4 system-ui; text-align:center; padding:16px;
-      background:rgba(0,0,0,.65); z-index:9999;
+      background:rgba(0,0,0,.55); z-index:9999;
+      color:#fff; font:14px/1.4 system-ui; text-align:center; padding:16px;
     }
-    #btn{padding:12px 18px;border-radius:999px;border:0;font-size:16px;}
-    #log{position:fixed;left:12px;right:12px;bottom:12px;color:#fff;font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-         text-shadow:0 1px 4px rgba(0,0,0,.6); white-space:pre-wrap;}
+    #btn{pointer-events:auto;padding:12px 18px;border-radius:999px;border:0;font-size:16px;}
+    #msg{margin-top:10px; opacity:.9;}
   </style>
-
-  <!-- A-Frame（先に読み込む） -->
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-
-  <!-- MindAR（CDNを unpkg に変更して安定化） -->
-  <script src="https://unpkg.com/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
 </head>
 
 <body>
   <div id="overlay">
     <div>
-      <div style="margin-bottom:12px;">ARを開始します。<br>ボタンを押してカメラ許可 → 作品（ターゲット画像）を映してください。</div>
       <button id="btn">ARを開始</button>
+      <div id="msg">ボタンを押す → カメラ許可 → 作品（ターゲット画像）を映してください</div>
     </div>
   </div>
-  <div id="log"></div>
 
   <a-scene
     id="scene"
@@ -49,37 +44,50 @@
   </a-scene>
 
   <script>
-    const logEl = document.getElementById('log');
     const overlay = document.getElementById('overlay');
     const btn = document.getElementById('btn');
+    const msg = document.getElementById('msg');
     const sceneEl = document.getElementById('scene');
 
-    function log(msg){
-      logEl.textContent = (logEl.textContent ? logEl.textContent + "\n" : "") + msg;
-    }
-
-    // 重要：targets.mind と art.png が取得できるか先に確認（404だとここで判明）
-    async function check(url){
-      const res = await fetch(url, { cache: "no-store" });
-      log(`${url} -> ${res.status}`);
-      if(!res.ok) throw new Error(`${url} の取得に失敗しました（${res.status}）`);
+    // “mindar-image-system” が登録されるまで待ってから start する（iPhone対策）
+    function waitForMindARSystem() {
+      return new Promise((resolve, reject) => {
+        const t0 = Date.now();
+        const timer = setInterval(() => {
+          const sys = sceneEl.systems && sceneEl.systems['mindar-image-system'];
+          if (sys && typeof sys.start === 'function') {
+            clearInterval(timer);
+            resolve(sys);
+          }
+          if (Date.now() - t0 > 6000) { // 6秒待っても出ないなら失敗
+            clearInterval(timer);
+            reject(new Error('MindARの初期化に失敗しました（スクリプト読み込み/targets.mind を確認）'));
+          }
+        }, 100);
+      });
     }
 
     btn.addEventListener('click', async () => {
-      try{
-        log('start...');
-        await check('./targets.mind');
-        await check('./art.png');
+      try {
+        msg.textContent = '起動中…';
+        // targets/art が取れるか軽く確認（失敗すると理由が分かる）
+        const [tRes, aRes] = await Promise.all([
+          fetch('./targets.mind', {cache:'no-store'}),
+          fetch('./art.png', {cache:'no-store'})
+        ]);
+        if (!tRes.ok) throw new Error('targets.mind が見つかりません（' + tRes.status + '）');
+        if (!aRes.ok) throw new Error('art.png が見つかりません（' + aRes.status + '）');
 
-        // MindAR start（ユーザー操作後に開始）
-        await sceneEl.systems["mindar-image-system"].start();
+        const sys = await waitForMindARSystem();
+        await sys.start();
+
         overlay.style.display = 'none';
-        log('AR started. ターゲット画像を映してください。');
-      }catch(e){
-        log('ERROR: ' + (e && e.message ? e.message : e));
-        alert('AR開始に失敗しました。\n' + (e && e.message ? e.message : e));
+      } catch (e) {
+        alert('AR開始に失敗しました。\n' + (e?.message ?? e));
+        msg.textContent = '失敗：' + (e?.message ?? e);
       }
     });
   </script>
 </body>
 </html>
+
