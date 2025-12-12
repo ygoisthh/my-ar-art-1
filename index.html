@@ -18,7 +18,8 @@
     #btn{padding:12px 18px;border-radius:999px;border:0;font-size:16px;}
     #status{margin-top:10px;opacity:.9}
     a-scene{position:fixed;inset:0;width:100%;height:100%;}
-    /* MindARのカメラ(video)と描画(canvas)を確実に全画面に出す */
+   
+/* 背景：カメラ(video) */
 video {
   position: fixed !important;
   inset: 0 !important;
@@ -28,20 +29,26 @@ video {
   z-index: 0 !important;
 }
 
-a-scene, canvas {
+/* AR描画：a-scene と canvas を video より上へ */
+a-scene {
   position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  z-index: 2 !important;
 }
 
 canvas {
-  z-index: 1 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 3 !important;
 }
 
-#overlay {
-  z-index: 9999 !important;
-}
+/* ボタンUIは最前面 */
+#overlay { z-index: 9999 !important; }
+
 
   </style>
 </head>
@@ -121,4 +128,5 @@ canvas {
   </script>
 </body>
 </html>
+
 
