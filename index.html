@@ -3,36 +3,83 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Camera Test</title>
+  <title>My AR Art</title>
+
   <style>
     html,body{margin:0;height:100%;background:#000;overflow:hidden;}
-    #v{width:100vw;height:100vh;object-fit:cover;}
-    #btn{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);padding:12px 18px;border-radius:999px;border:0;font-size:16px;}
-    #msg{position:fixed;left:12px;right:12px;bottom:12px;color:#fff;font:14px/1.4 system-ui;text-shadow:0 1px 4px rgba(0,0,0,.6);}
+    #overlay{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      color:#fff;font:14px/1.4 system-ui; text-align:center; padding:16px;
+      background:rgba(0,0,0,.65); z-index:9999;
+    }
+    #btn{padding:12px 18px;border-radius:999px;border:0;font-size:16px;}
+    #log{position:fixed;left:12px;right:12px;bottom:12px;color:#fff;font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+         text-shadow:0 1px 4px rgba(0,0,0,.6); white-space:pre-wrap;}
   </style>
+
+  <!-- A-Frame（先に読み込む） -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+
+  <!-- MindAR（CDNを unpkg に変更して安定化） -->
+  <script src="https://unpkg.com/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
 </head>
+
 <body>
-  <video id="v" autoplay playsinline muted></video>
-  <button id="btn">カメラ開始</button>
-  <div id="msg">ボタンを押すとカメラ許可が出るはずです。</div>
+  <div id="overlay">
+    <div>
+      <div style="margin-bottom:12px;">ARを開始します。<br>ボタンを押してカメラ許可 → 作品（ターゲット画像）を映してください。</div>
+      <button id="btn">ARを開始</button>
+    </div>
+  </div>
+  <div id="log"></div>
+
+  <a-scene
+    id="scene"
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;"
+    vr-mode-ui="enabled:false"
+    device-orientation-permission-ui="enabled:false"
+    embedded>
+
+    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-image src="./art.png" width="1.5" height="1.5" position="0 0 0.01"></a-image>
+    </a-entity>
+
+  </a-scene>
 
   <script>
-    const v = document.getElementById('v');
+    const logEl = document.getElementById('log');
+    const overlay = document.getElementById('overlay');
     const btn = document.getElementById('btn');
-    const msg = document.getElementById('msg');
+    const sceneEl = document.getElementById('scene');
 
-    btn.onclick = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio:false });
-        v.srcObject = stream;
-        btn.style.display = 'none';
-        msg.textContent = 'カメラOK。';
-      } catch (e) {
-        msg.textContent = 'カメラ開始失敗: ' + e.name + ' / ' + e.message;
-        alert(msg.textContent);
+    function log(msg){
+      logEl.textContent = (logEl.textContent ? logEl.textContent + "\n" : "") + msg;
+    }
+
+    // 重要：targets.mind と art.png が取得できるか先に確認（404だとここで判明）
+    async function check(url){
+      const res = await fetch(url, { cache: "no-store" });
+      log(`${url} -> ${res.status}`);
+      if(!res.ok) throw new Error(`${url} の取得に失敗しました（${res.status}）`);
+    }
+
+    btn.addEventListener('click', async () => {
+      try{
+        log('start...');
+        await check('./targets.mind');
+        await check('./art.png');
+
+        // MindAR start（ユーザー操作後に開始）
+        await sceneEl.systems["mindar-image-system"].start();
+        overlay.style.display = 'none';
+        log('AR started. ターゲット画像を映してください。');
+      }catch(e){
+        log('ERROR: ' + (e && e.message ? e.message : e));
+        alert('AR開始に失敗しました。\n' + (e && e.message ? e.message : e));
       }
-    };
+    });
   </script>
 </body>
 </html>
-
