@@ -63,7 +63,7 @@ canvas {
 
   <a-scene
     id="scene"
-    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;"
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.001; filterBeta: 0.001;"
     vr-mode-ui="enabled:false"
     device-orientation-permission-ui="enabled:false"
     embedded>
@@ -74,7 +74,9 @@ canvas {
   <a-image src="./art.png"
            width="0.6"
            height="0.6"
-           position="0 0.2.5 0.02">
+           position="0 0.2.5 0.02"
+   　　　　 animation="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 0.25 0.02"
+ 　　　　　 animation__rot="property: rotation; dir: alternate; dur: 5000; easing: easeInOutSine; loop: true; to: 0 0 2">>
   </a-image>
 </a-entity>
 
@@ -133,6 +135,7 @@ canvas {
   </script>
 </body>
 </html>
+
 
 
 
