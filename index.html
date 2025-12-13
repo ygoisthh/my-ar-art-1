@@ -57,14 +57,14 @@
     <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
-      <a-image
+     <a-image
   id="art"
   src="./art.png"
   width="0.4"
   height="0.4"
   position="0 0.4 0.02"
   opacity="0"
-  scale="0.95 0.95 0.95"
+  scale="0.96 0.96 0.96"
 
   animation__fade="property: opacity; from: 0; to: 1;
                    dur: 900; easing: easeOutCubic; startEvents: ar-show"
@@ -75,8 +75,16 @@
 
   animation__pulse="property: scale; dir: alternate;
                     dur: 2000; easing: easeInOutSine; loop: true;
-                    to: 1.02 1.02 1.02; delay: 900; startEvents: ar-show">
+                    to: 1.02 1.02 1.02; delay: 900; startEvents: ar-show"
+
+  animation__breath="property: opacity; dir: alternate;
+                     dur: 2000; easing: easeInOutSine; loop: true;
+                     from: 0.75; to: 1; delay: 900; startEvents: ar-show"
+
+  animation__fadeout="property: opacity; to: 0;
+                      dur: 800; easing: easeOutCubic; startEvents: ar-hide">
 </a-image>
+
     </a-entity>
 
   </a-scene>
@@ -113,8 +121,8 @@
 
     // 見失ったら消す（必要なければ消してOK）
     targetEl.addEventListener('targetLost', () => {
-      imgEl.setAttribute('opacity', '0');
-    });
+  imgEl.emit('ar-hide');
+});
 
     btn.addEventListener('click', async () => {
       try {
@@ -145,5 +153,6 @@
   </script>
 </body>
 </html>
+
 
 
