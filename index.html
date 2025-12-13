@@ -62,7 +62,7 @@
   src="./art.png"
   width="0.45"
   height="0.45"
-  position="0 0.1 0.02"
+  position="0 0.15 0.02"
   opacity="0"
   scale="0.95 0.95 0.95"
 
@@ -111,14 +111,35 @@
     }
 
     // ここが「フェードイン→揺れ開始」のトリガー
-    targetEl.addEventListener('targetFound', () => {
-      imgEl.emit('ar-show');
-    });
+    let isShown = false;
+let lostTimer = null;
 
-    // 見失ったら消す（必要なければ消してOK）
-    targetEl.addEventListener('targetLost', () => {
-  imgEl.emit('ar-hide');
+targetEl.addEventListener('targetFound', () => {
+  // 一瞬のlost→foundで再開始しないように、消去予約をキャンセル
+  if (lostTimer) { clearTimeout(lostTimer); lostTimer = null; }
+
+  // すでに表示中なら ar-show を再発火しない（←跳ね防止の要）
+  if (isShown) return;
+
+  isShown = true;
+  imgEl.emit('ar-show');
 });
+
+targetEl.addEventListener('targetLost', () => {
+  // すでに非表示扱いなら何もしない
+  if (!isShown) return;
+
+  // 200msだけ様子見：すぐ復帰するなら消さない（チラつき防止）
+  lostTimer = setTimeout(() => {
+    imgEl.emit('ar-hide');
+
+    // fadeout(dur:800) が終わった頃に「非表示」に戻す
+    setTimeout(() => { isShown = false; }, 800);
+
+    lostTimer = null;
+  }, 200);
+});
+
 
     btn.addEventListener('click', async () => {
       try {
@@ -149,6 +170,7 @@
   </script>
 </body>
 </html>
+
 
 
 
