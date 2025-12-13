@@ -58,15 +58,17 @@
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
       <a-image
-        id="art"
-        src="./art.png"
-        width="1.2"
-        height="1.2"
-        position="0 0.2 0.02"
-        opacity="0"
-        animation__fade="property: opacity; from: 0; to: 1; dur: 900; easing: easeOutCubic; startEvents: ar-show"
-        animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 0.25 0.02; delay: 900; startEvents: ar-show">
-      </a-image>
+  id="art"
+  src="./art.png"
+  width="0.5"
+  height="0.5"
+  position="0 0.2 0.02"
+  opacity="0"
+  scale="0.95 0.95 0.95"
+  animation__fade="property: opacity; from: 0; to: 1; dur: 900; easing: easeOutCubic; startEvents: ar-show"
+  animation__float="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 0.25 0.02; delay: 900; startEvents: ar-show"
+  animation__pulse="property: scale; dir: alternate; dur: 1800; easing: easeInOutSine; loop: true; to: 1.03 1.03 1.03; delay: 900; startEvents: ar-show">
+</a-image>
     </a-entity>
 
   </a-scene>
@@ -135,3 +137,4 @@
   </script>
 </body>
 </html>
+
