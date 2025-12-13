@@ -126,6 +126,7 @@ targetEl.addEventListener('targetFound', () => {
 
   isShown = true;
   imgEl.emit('ar-show');
+  status.textContent="FOUND";
 });
 
 targetEl.addEventListener('targetLost', () => {
@@ -173,6 +174,7 @@ targetEl.addEventListener('targetLost', () => {
   </script>
 </body>
 </html>
+
 
 
 
