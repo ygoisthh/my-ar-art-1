@@ -66,7 +66,10 @@
   opacity="0"
   scale="0.95 0.95 0.95"
   animation__fade="property: opacity; from: 0; to: 1; dur: 900; easing: easeOutCubic; startEvents: ar-show"
-  animation__pulse="property: scale; dir: alternate; dur: 2000; easing: easeInOutSine; loop: true; from: 0.95 0.95 0.95; to: 1.05 1.05 1.05; delay: 900; startEvents: ar-show"
+  animation__pulse="property: scale; dir: alternate;
+                  dur: 2000; easing: easeInOutSine; loop: true;
+                  from: 0.95 0.95 0.95;
+                  to: 1.05 1.05 1.05"
   animation__breath="property: opacity; dir: alternate; dur: 2000; easing: easeInOutSine; loop: true; from: 0.75; to: 1; delay: 900; startEvents: ar-show"
   animation__fadeout="property: opacity; to: 0; dur: 800; easing: easeOutCubic; startEvents: ar-hide">
 </a-image>
@@ -162,6 +165,7 @@ targetEl.addEventListener('targetLost', () => {
   </script>
 </body>
 </html>
+
 
 
 
