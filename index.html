@@ -69,9 +69,12 @@
   animation__fade="property: opacity; from: 0; to: 1;
                    dur: 900; easing: easeOutCubic; startEvents: ar-show"
 
-  animation__pulse="property: scale; dir: alternate;
-                    dur: 2000; easing: easeInOutSine; loop: true;
-                    to: 1.02 1.02 1.02; delay: 900; startEvents: ar-show"
+ 　animation__pulse="property: scale; dir: alternate;
+                  dur: 2000; easing: easeInOutSine; loop: true;
+                  from: 0.95 0.95 0.95;
+                  to: 1.05 1.05 1.05;
+                  delay: 900;
+                  startEvents: ar-show"
 
   animation__breath="property: opacity; dir: alternate;
                      dur: 2000; easing: easeInOutSine; loop: true;
@@ -170,6 +173,7 @@ targetEl.addEventListener('targetLost', () => {
   </script>
 </body>
 </html>
+
 
 
 
